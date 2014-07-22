@@ -1,49 +1,32 @@
 #include <iostream>
-#include <array>
-#include <sstream>
-
-const unsigned int BUFFER_SIZE = 4096;
+#include <string>
 
 int main()
 {
-    std::string input_str = 
-"\"To be or not to be,\" quoth the Bard, \"that is the question\".\n"
-"The programming contestant replied: \"I must disagree."
-"To `C' or not to `C', that is The Question!\"";
-    std::istringstream input(input_str);
-    
-    std::istream& in = input;
-    
-    std::array<char, BUFFER_SIZE> buffer = {};
-    std::array<char, BUFFER_SIZE> output = {};
-    while(in.getline(buffer.data(), BUFFER_SIZE))
+    bool close = true;
+    std::string buffer;
+    while(getline(std::cin, buffer))
     {
-        bool close = true;
-        const char* src_ptr = buffer.data();
-        char* dst_ptr = output.data();
-        while(*src_ptr != '\0')
+        std::string output;
+        for(const auto src_char: buffer)
         {
-            if(*src_ptr != '\"') // content char
+            if(src_char != '\"')
             {
-                *dst_ptr++ = *src_ptr;
+                output += src_char;
             }
-            else if(close) // ``
+            else if(close) // ``, left "
             {
-                *dst_ptr++ = '`';
-                *dst_ptr++ = '`';
+                output += "``";
                 close = false;
             }
-            else // ''
+            else // '', right "
             {
-                *dst_ptr++ = '\'';
-                *dst_ptr++ = '\'';
+                output += "''";
                 close = true;
             }
-            src_ptr++;
         }
-        std::cout << output.data() << "\n";
+        std::cout << output << "\n";
     }
     std::cout << std::flush;
-   
    return 0;
 }
