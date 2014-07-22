@@ -5,9 +5,9 @@ int main()
 {
     bool close = true;
     std::string buffer;
+    std::string output;
     while(getline(std::cin, buffer))
     {
-        std::string output;
         for(const auto src_char: buffer)
         {
             if(src_char != '\"')
@@ -26,7 +26,8 @@ int main()
             }
         }
         std::cout << output << "\n";
+        output.clear();
     }
     std::cout << std::flush;
-   return 0;
+    return 0;
 }
