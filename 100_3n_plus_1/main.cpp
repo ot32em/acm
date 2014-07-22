@@ -1,14 +1,15 @@
 #include <iostream>
 #include <array>
 typedef unsigned long long int_t;
+const int_t CACHE_SIZE = 1000000; // input max: 999999
             
 int main(int argc, char** argv)
 {
-    std::array<int_t, 1000000> cache = {}; // all reset to 0
+    std::array<int_t, CACHE_SIZE> cache = {}; // all reset to 0
     int_t lhs, rhs;
     while(std::cin >> lhs >> rhs)
     {
-        const auto min_n = std::min(lhs, rhs); 
+        const auto min_n = std::min(lhs, rhs);
         const auto max_n = std::max(lhs, rhs);
         int_t max_cycles = 1;
         for(auto i = min_n; i <= max_n; i++)
