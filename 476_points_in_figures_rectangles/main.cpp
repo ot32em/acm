@@ -1,65 +1,86 @@
 #include <iostream>
-#include <cassert>
 #include <vector>
-#include <limits>
-#include <cmath>
 
 
-bool close(double lhs, double rhs)
+int get_number(const std::string& str)
 {
-    return std::fabs(lhs - rhs) < std::numeric_limits<double>::epsilon();
+    auto point_pos = str.find(".");
+    if(point_pos != std::string::npos)
+    {
+        // left side
+        int n = std::stoi(str.substr(0, point_pos));
+        int dec_n_pos = point_pos + 1;
+        int dec_n = std::stoi(str.substr(dec_n_pos, 1));
+        return n*10 + dec_n;
+    }
+    return std::stoi(str) * 10;
 }
 
-class Rect
-{public:
-    Rect(double x1, double y1, double x2, double y2, unsigned int nth)
-        :m_x1(x1),  m_y1(y1),  m_x2(x2),  m_y2(y2),  m_nth(nth)
-        {}
-    double nth() const {return m_nth;}
-    double m_x1;
-    double m_y1;
-    double m_x2;
-    double m_y2;
-    unsigned int m_nth;
-    bool contains(double x, double y) const
+
+struct Point
+{
+    int x;
+    int y;
+    Point(const std::string& sx, const std::string& sy)
+        :x(get_number(sx)), y(get_number(sy)){}
+    bool right_has(const Point& p) const { return p.x >= x; }
+    bool left_has(const Point& p) const { return p.x <= x; }
+    bool down_has(const Point& p) const { return p.y <= y; }
+    bool top_has(const Point& p) const { return p.y >= y; }
+};
+
+struct Rect
+{
+    Point left_top;
+    Point right_buttom;
+    bool contains(const Point& p) const
     {
-        return x >= m_x1 && y <= m_y1 &&
-               x <= m_x2 && y >= m_y2;
+        return left_top.right_has(p) && left_top.down_has(p) 
+            && right_buttom.left_has(p) && right_buttom.top_has(p);
     }
 };
 
 int main(int argc, char** argv)
 {
+    // read rectangles
     std::vector<Rect> rects;
     char c;
-    double x1, y1, x2, y2;
-    int nth_r = 1;
+    std::string sx1, sy1, sx2, sy2;
     while(std::cin >> c)
     {
         if(c == '*')
             break;
-        std::cin >> x1 >> y1 >> x2 >> y2;
-        rects.push_back(Rect(x1, y1, x2, y2, nth_r++));
+        std::cin >> sx1 >> sy1 >> sx2 >> sy2;
+        Rect rect = {Point(sx1, sy1), Point(sx2, sy2)};
+        rects.push_back(rect);
     }
 
-    double x, y;
+    // read points and test
+    std::string sx, sy;
     unsigned int nth_p = 0;
-    while(std::cin >> x >> y)
+    while(std::cin >> sx >> sy)
     {
-        if(close(x, 9999.9) && close(y, 9999.9))
+        // read point
+        if(sx == "9999.9" && sy == "9999.9")
             break;
+        Point p(sx, sy);
         nth_p++;
+
+        // test contained in rect one by one
+        int nth_r = 0;
         bool in_any = false;
         for(const auto& rect: rects)
         {
-            if(!rect.contains(x, y))
+            nth_r++;
+            if(!rect.contains(p))
                 continue;
             in_any = true;
             std::cout << "Point " << nth_p 
-                      << " is contained in figure " << rect.nth() << "\n";
+                      << " is contained in figure " << nth_r << "\n";
         }
         if(!in_any)
-            std::cout << "Point " << nth_p << " is not contained in any figure\n";
+            std::cout << "Point " << nth_p 
+                      << " is not contained in any figure\n";
     }
     return 0;
 }
