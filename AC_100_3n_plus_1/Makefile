@@ -1,3 +1,2 @@
-all::
-	g++ --std=c++11 main.cpp
-	time cat 1.in | ./a.out
+all:
+	@sh ../share/build_run_clean.sh

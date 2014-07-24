@@ -1,2 +1,2 @@
 all:
-	g++ --std=c++11 main.cpp
+	@sh ../share/build_run_clean.sh
