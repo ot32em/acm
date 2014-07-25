@@ -6,15 +6,10 @@ namespace geo
 {
 
 
-template <typename PointT>
-class AxisX
-{
-    AxisSel(const PointT&)
-    
-
 template<class CoorT>
 struct Point
 {
+    enum AXIS{X, Y};
     CoorT x;
     CoorT y;
 };
@@ -24,13 +19,6 @@ struct Line
 {
     Point<CoorT> p1;
     Point<CoorT> p2;
-
-    template <typename Comp, typename AxisSel>
-    CoorT bound() const{
-        return Comp(AxisSel(p).value(), AxisSel(p).value()).value();
-    }
 };
-
-line.bound<x>.max();
 
 }
