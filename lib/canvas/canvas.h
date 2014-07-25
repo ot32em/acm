@@ -27,11 +27,11 @@ struct Line
 
 struct Canvas
 {
-    static const int ROW = 23;
-    static const int COL = 80;
-    typedef std::array<std::array<char, Canvas::COL>, Canvas::ROW> CanvasDataT;
+    static const int ROW = 40;
+    static const int COL = 40;
+    typedef std::array<std::array<std::pair<char, char>, Canvas::COL>, Canvas::ROW> CanvasDataT;
     typedef std::pair<int, int> PointT; // x/y
-    std::map<PointT, char> m_points;
+    std::map<PointT, std::pair<char, char>> m_points;
     std::vector<Line> m_lines;
 
     Canvas() {}
@@ -45,7 +45,7 @@ struct Canvas
             auto& value = p.second;
 
             // write point
-            canvas_data.paint(key.first, key.second, value);
+            canvas_data.paint(key.first, key.second, value.first, value.second);
 
             // write text
             std::ostringstream ss;
@@ -66,9 +66,9 @@ struct Canvas
         canvas_data.render();
     }
 
-    void add_point(int x, int y, char c='x')
+    void add_point(int x, int y, char c='x', char c2=' ')
     {
-        m_points.insert(std::make_pair(std::make_pair(x, y), c));
+        m_points.insert(std::make_pair(std::make_pair(x, y), std::make_pair(c, c2)));
     }
     void del_point(int x, int y)
     {
@@ -97,16 +97,19 @@ struct Canvas
                     if(e_iter == row_iter->begin() ||
                        e_iter == row_iter->begin() + row_iter->size() - 1)
                     {
-                        *e_iter = '|';
+                        e_iter->first = '|';
+                        e_iter->second = '|';
                     }
                     else if(row_iter == m_data.begin() ||
                             row_iter == m_data.begin() + m_data.size() - 1)
                     {
-                        *e_iter = '-';
+                        e_iter->first = '-';
+                        e_iter->second = '-';
                     }
                     else
                     {
-                        *e_iter = ' ';
+                        e_iter->first = ' ';
+                        e_iter->second = ' ';
                     }
                 }
             }
@@ -115,17 +118,35 @@ struct Canvas
         void paint(int x, int y, const std::string& s)
         {
             int i=0;
+            bool half=false;
+            char last_c = s[0];
             for(char c:s)
-                paint(x + (i++), y, c);
+            {
+                if(half)
+                {
+                    half = false;
+                    i++;
+                    paint(x+i, y, last_c, c);
+                }
+                else
+                {
+                    half = true;
+                }
+                last_c = c;
+            }
+            if(half)
+            {
+                paint(x+i+1, y, last_c);
+            }
         }
 
-        void paint(int x, int y, char c='x')
+        void paint(int x, int y, char c='x', char c2=' ')
         {
             if(y >= ROW || y < 0)
                 return;
             if(x >= COL || x < 0)
                 return ;
-            m_data[y][x] = c;
+            m_data[y][x] = std::make_pair(c, c2);
         }
 
         void paint(const Point& p1, const Point& p2)
@@ -141,8 +162,8 @@ struct Canvas
                 int yt = p1.y + (p2.y-p1.y) * t;
                 paint(xt, yt, '.');
             }
-            paint(p1.x, p1.y, 'O');
-            paint(p2.x, p2.y, 'o');
+            paint(p1.x, p1.y, '<', '>');
+            paint(p2.x, p2.y, '(', ')');
 
         }
         void erase(int x, int y)
@@ -151,14 +172,14 @@ struct Canvas
                 return;
             if( x >= COL || x < 0)
                 return;
-            m_data[y][x] = ' ';
+            m_data[y][x] = std::make_pair(' ', ' ');
         }
         
         void render(std::ostream& out = std::cout) const
         {
             for(auto iter = m_data.rbegin(); iter != m_data.rend(); iter++)
             {
-                for(auto p: *iter) { out << p; }
+                for(auto p: *iter) { out << p.first << p.second; }
                 out << std::endl;
             }
         }
